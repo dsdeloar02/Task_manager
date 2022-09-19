@@ -1,0 +1,29 @@
+.navbar-brand{
+    color: aliceblue;
+}
+.navbar-nav .nav-link.active, .navbar-nav .show > .nav-link{
+    color: #fff;
+}
+
+footer{
+    margin-top: 20px;
+    width: 100%;
+    padding: 15px 0px;
+}
+.alert.alert-dismissible.d-flex.align-items-center {
+    padding: 10px 8px;
+}
+
+.alert-dismissible .btn-close {
+    position: absolute;
+    top: 9px;
+    right: 5px;
+    z-index: 2;
+    padding: 1.25rem 1rem;
+}
+.alert.alert-succes{
+    margin-bottom: 0px;
+}
+.alert.alert-danger{
+    margin-bottom: 0px;
+}
