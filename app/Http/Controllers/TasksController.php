@@ -38,9 +38,6 @@ class TasksController extends Controller
      */
     public function store(TaskCreateRequest $request)
     {
-
-
-
         // dd($request);
 
         $task = new task();
@@ -48,9 +45,9 @@ class TasksController extends Controller
         $task->slug = Str::of($request->title)->slug;
         $task->description = $request->description;
         $task->status = $request->status;
-        // $file = $request->file('image');
-        $image_name = Str::of($request->tile)->slug();
-        $task->image = $request->file('image')->storePubliclyAs('public', $image_name);
+        $file = $request->file('image');
+        $image_name = Str::of($request->tile)->slug(). '-' . $file->extension();
+        $task->image = $file->storePubliclyAs('public/tasks', $image_name);
         $task->save();
 
 
@@ -62,7 +59,6 @@ class TasksController extends Controller
         session()->flash('success', 'Category Created successful!');
 
         return redirect()->route('tasks.index');
-
     }
 
     /**
@@ -76,15 +72,42 @@ class TasksController extends Controller
         //
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Models\Task  $task
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Task $task)
+
+    // 01 Way edit one
+
+    // public function edit(string $slug){
+    //     $task = Task::where('slug', $slug)->first();
+    //     if(!$task){
+    //         abort(404);
+    //     }
+    //     return view('tasks.edit', compact('task'));
+    // }
+
+
+    // 02 Way edit one
+    // /**
+    //  * Show the form for editing the specified resource.
+    //  *
+    //  * @param  \App\Models\Task  $task
+    //  * @return \Illuminate\Http\Response
+    //  */
+    // public function edit(Task $task)
+    // {
+    //     return view('tasks.edit', compact('task'));
+    // }
+
+    // 03 Way edit one
+
+    public function edit($id_or_slug)
     {
-        //
+        $task =  $this->getTaskyIdOrSlug($id_or_slug);
+
+        if (!$task) {
+            session()->flash('error', 'Sorry,Task is not found ! ');
+            return redirect()->route('tasks.index');
+        }
+
+        return view('tasks.edit', compact('task'));
     }
 
     /**
@@ -108,5 +131,16 @@ class TasksController extends Controller
     public function destroy(Task $task)
     {
         //
+    }
+
+
+
+    public function getTaskyIdOrSlug($id_or_slug)
+    {
+        if (is_numeric($id_or_slug)) {
+            return Task::find($id_or_slug);
+        } else {
+            return Task::where('slug', $id_or_slug)->first();
+        }
     }
 }
