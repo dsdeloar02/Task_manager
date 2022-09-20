@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Task;
 use Illuminate\Support\Str;
-use Illuminate\Http\Request;
 use App\Http\Requests\TaskCreateRequest;
+use Illuminate\Support\Facades\Storage;
 
 class TasksController extends Controller
 {
@@ -46,7 +46,8 @@ class TasksController extends Controller
         $task->description = $request->description;
         $task->status = $request->status;
         $file = $request->file('image');
-        $image_name = Str::of($request->tile)->slug(). '-' . $file->extension();
+        $image_name = Str::of($request->tile)->slug().'-'.time().$file->extension();
+        // dd($image_name);
         $task->image = $file->storePubliclyAs('public/tasks', $image_name);
         $task->save();
 
@@ -56,7 +57,7 @@ class TasksController extends Controller
         $task->slug = $task->slug.'-'. $task->id;
         $task->save();
 
-        session()->flash('success', 'Category Created successful!');
+        session()->flash('success', 'Task Created successful!');
 
         return redirect()->route('tasks.index');
     }
@@ -117,9 +118,32 @@ class TasksController extends Controller
      * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Task $task)
+    public function update(TaskCreateRequest $request, $id_or_slug)
     {
-        //
+        $task =  $this->getTaskyIdOrSlug($id_or_slug);
+        if (!$task) {
+            session()->flash('error', 'Sorry,Task is not found ! ');
+            return redirect()->route('tasks.index');
+        }
+        $task->title = $request->title;
+        $task->slug = Str::of($request->title)->slug.'-'. $task->id;
+        $task->description = $request->description;
+        $task->status = $request->status;
+
+        if($request->image){
+            if($task->image){
+                Storage::delete($task->image);
+            }
+            $file = $request->file('image');
+            // dd($file);
+            $image_name = Str::of($request->tile)->slug().'-'.time().$file->extension();
+            $task->image = $file->storePubliclyAs('public/tasks', $image_name);
+        }
+        $task->save();
+
+        session()->flash('success', 'Task Updated successful!');
+
+        return redirect()->route('tasks.index');
     }
 
     /**
@@ -128,9 +152,30 @@ class TasksController extends Controller
      * @param  \App\Models\Task  $task
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Task $task)
+    public function destroy($id_or_slug)
     {
-        //
+
+        // Find First
+
+        $task =  $this->getTaskyIdOrSlug($id_or_slug);
+        if (!$task) {
+            session()->flash('error', 'Sorry,Task is not found ! ');
+            return redirect()->route('tasks.index');
+        }
+
+        // Check if any image
+        if($task->image){
+            Storage::delete($task->image);
+        }
+        // Delete
+        $task->delete();
+
+        // Success messegae
+
+        
+        session()->flash('success', 'Task Deleted successful!');
+
+        return redirect()->route('tasks.index');
     }
 
 

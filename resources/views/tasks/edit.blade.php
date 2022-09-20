@@ -5,8 +5,10 @@
         <h2 class="my-3">Edit Tasks</h2>
 
         <div class="shadow border border-1 p-4 rounded ">
-            <form action="{{ route('tasks.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('tasks.update', $task->id) }}" method="POST" enctype="multipart/form-data">
                 @csrf
+                @method('PUT')
+
                 @include('partials.messages')
                 <div class="mb-3">
                     <label for="title" class="form-label">Task title</label>
